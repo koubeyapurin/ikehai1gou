@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イケ配 - 注文確認</title>
+    
+    <!-- PWA対応 -->
+    <meta name="description" content="料理も、ときめきも、一緒に届けます。イケメン配達員を指名できる新感覚デリバリーアプリ。">
+    <meta name="theme-color" content="#ff6b9d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="イケ配">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="logo">🚴 イケ配 Ikehai</h1>
+                    <p class="tagline">ときめく配達、届けます</p>
+                </div>
+                <div class="header-right">
+                    <a href="shop.html" class="shop-link">🛍️ ショップ</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <div class="container">
+            <!-- ステップインジケーター -->
+            <div class="step-indicator">
+                <div class="step completed">
+                    <span class="step-number">1</span>
+                    <span class="step-label">料理選択</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step completed">
+                    <span class="step-number">2</span>
+                    <span class="step-label">配達員選択</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step active">
+                    <span class="step-number">3</span>
+                    <span class="step-label">注文確認</span>
+                </div>
+            </div>
+
+            <section class="intro-section">
+                <h2>注文内容を確認してください</h2>
+            </section>
+
+            <!-- 注文確認カード -->
+            <div class="confirm-container">
+                <div class="confirm-card">
+                    <h3>📦 ご注文内容</h3>
+                    <div id="orderDetails" class="order-details">
+                        <div class="loading">読み込み中...</div>
+                    </div>
+                </div>
+
+                <div class="confirm-card">
+                    <h3>🚴 担当配達員</h3>
+                    <div id="riderDetails" class="rider-details">
+                        <div class="loading">読み込み中...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 料金明細カード -->
+            <div class="price-summary-card">
+                <h3>💰 料金明細</h3>
+                <div id="priceSummary" class="price-summary">
+                    <div class="loading">読み込み中...</div>
+                </div>
+            </div>
+
+            <!-- アクションボタン -->
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="window.location.href='riders.html'">
+                    ← 配達員を選び直す
+                </button>
+                <button class="btn btn-primary btn-large" onclick="confirmOrder()">
+                    注文を確定する ✨
+                </button>
+            </div>
+
+            <!-- 注文完了モーダル（非表示） -->
+            <div id="orderModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-icon">🎉</div>
+                    <h2>注文が確定しました！</h2>
+                    <div class="rider-coming">
+                        <img id="modalRiderImage" src="" alt="配達員" class="rider-avatar">
+                        <p class="rider-message">
+                            <span id="modalRiderName"></span>さんが<br>
+                            あなたのもとへ向かっています！
+                        </p>
+                        <div class="rider-message-box">
+                            <p id="modalRiderGreeting" class="modal-greeting"></p>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <p class="eta">予定到着時刻: 約30分</p>
+                    <button class="btn btn-primary" onclick="goToTracking()">
+                        配達状況を見る 📍
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <p>&copy; 2025 Ikehai - All Rights Reserved</p>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        let menuData = [];
+        let ridersData = [];
+
+        // データを読み込んで注文内容を表示
+        function loadOrderDetails() {
+            try {
+                // data.jsから直接データを取得
+                menuData = getMenuData();
+                ridersData = getRidersData();
+
+                displayOrderDetails();
+            } catch (error) {
+                console.error('データの読み込みに失敗しました:', error);
+            }
+        }
+
+        // 注文詳細を表示
+        function displayOrderDetails() {
+            const menuId = parseInt(localStorage.getItem('selectedMenuId'));
+            const riderId = parseInt(localStorage.getItem('selectedRiderId'));
+
+            const selectedMenu = menuData.find(item => item.id === menuId);
+            const selectedRider = ridersData.find(rider => rider.id === riderId);
+
+            if (!selectedMenu || !selectedRider) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // メニュー詳細を表示
+            document.getElementById('orderDetails').innerHTML = `
+                <div class="detail-item">
+                    <img src="${selectedMenu.image}" alt="${selectedMenu.name}" class="detail-image">
+                    <div class="detail-info">
+                        <h4>${selectedMenu.name}</h4>
+                        <p>${selectedMenu.description}</p>
+                        <p class="price-large">¥${selectedMenu.price.toLocaleString()}</p>
+                    </div>
+                </div>
+            `;
+
+            // 配達員詳細を表示
+            document.getElementById('riderDetails').innerHTML = `
+                <div class="detail-item">
+                    <img src="${selectedRider.image}" alt="${selectedRider.name}" class="detail-image rider-image-round">
+                    <div class="detail-info">
+                        <h4>${selectedRider.name}</h4>
+                        <p class="rider-type">${selectedRider.type}</p>
+                        <p class="rider-stats">⭐ ${selectedRider.rating} | 🚴 ${selectedRider.deliveries}回配達</p>
+                        <p class="rider-quote-small">"${selectedRider.quote}"</p>
+                    </div>
+                </div>
+                <div class="rider-greeting-box">
+                    <p class="rider-greeting">💬 "${selectedRider.greeting}"</p>
+                </div>
+            `;
+            
+            // 会員情報を取得
+            const membership = getMembershipData();
+            
+            // 料金明細を表示
+            let deliveryFee = 300; // 基本配達料
+            let nominationFee = selectedRider.nominationFee; // 指名料
+            let serviceFee = Math.floor(selectedMenu.price * 0.1); // サービス手数料（商品代金の10%）
+            const restaurantFee = Math.floor(selectedMenu.price * 0.15); // 飲食店手数料（内部、表示は任意）
+            
+            // 会員割引を適用
+            let discountInfo = '';
+            if (membership && membership.active) {
+                const discounts = membership.discounts;
+                
+                // サービス手数料割引
+                if (discounts.serviceFee > 0) {
+                    const originalServiceFee = serviceFee;
+                    serviceFee = Math.floor(serviceFee * (1 - discounts.serviceFee));
+                    discountInfo += `<div class="discount-applied">💎 サービス手数料 ${discounts.serviceFee * 100}%オフ (-¥${originalServiceFee - serviceFee})</div>`;
+                }
+                
+                // 配達料割引
+                if (discounts.deliveryFee > 0) {
+                    const originalDeliveryFee = deliveryFee;
+                    deliveryFee = Math.floor(deliveryFee * (1 - discounts.deliveryFee));
+                    discountInfo += `<div class="discount-applied">💎 配達料 ${discounts.deliveryFee * 100}%オフ (-¥${originalDeliveryFee - deliveryFee})</div>`;
+                }
+                
+                // 指名料割引
+                if (discounts.nominationFee > 0) {
+                    const originalNominationFee = nominationFee;
+                    nominationFee = Math.floor(nominationFee * (1 - discounts.nominationFee));
+                    discountInfo += `<div class="discount-applied">💎 指名料 ${discounts.nominationFee * 100}%オフ (-¥${originalNominationFee - nominationFee})</div>`;
+                }
+            }
+            
+            const subtotal = selectedMenu.price + deliveryFee + nominationFee + serviceFee;
+            
+            document.getElementById('priceSummary').innerHTML = `
+                ${discountInfo}
+                <div class="price-row">
+                    <span>商品代金</span>
+                    <span>¥${selectedMenu.price.toLocaleString()}</span>
+                </div>
+                <div class="price-row">
+                    <span>配達料</span>
+                    <span>¥${deliveryFee.toLocaleString()}</span>
+                </div>
+                <div class="price-row">
+                    <span>サービス手数料 <span class="info-tooltip" title="イケ配プラットフォーム利用料">ⓘ</span></span>
+                    <span>¥${serviceFee.toLocaleString()}</span>
+                </div>
+                <div class="price-row price-highlight">
+                    <span>💕 指名料（${selectedRider.name}さん）</span>
+                    <span>¥${nominationFee.toLocaleString()}</span>
+                </div>
+                <div class="price-divider"></div>
+                <div class="price-row price-total">
+                    <span><strong>合計</strong></span>
+                    <span><strong>¥${subtotal.toLocaleString()}</strong></span>
+                </div>
+                <div class="revenue-note">
+                    <p class="note-text">※飲食店からは別途手数料（商品代金の15%）を徴収しています</p>
+                </div>
+            `;
+        }
+
+        // 会員情報を取得
+        function getMembershipData() {
+            const data = localStorage.getItem('membership');
+            return data ? JSON.parse(data) : null;
+        }
+
+        // 注文確定処理
+        function confirmOrder() {
+            const riderName = localStorage.getItem('selectedRiderName');
+            const riderId = parseInt(localStorage.getItem('selectedRiderId'));
+            const selectedRider = ridersData.find(rider => rider.id === riderId);
+
+            if (selectedRider) {
+                // モーダルに配達員情報を設定
+                document.getElementById('modalRiderName').textContent = riderName;
+                document.getElementById('modalRiderImage').src = selectedRider.image;
+                document.getElementById('modalRiderGreeting').textContent = `💬 ${selectedRider.greeting}`;
+            }
+
+            // モーダルを表示
+            const modal = document.getElementById('orderModal');
+            modal.style.display = 'flex';
+            
+            // プログレスバーアニメーション開始
+            setTimeout(() => {
+                modal.querySelector('.progress-fill').style.width = '100%';
+            }, 100);
+        }
+
+        // 配達追跡ページへ遷移
+        function goToTracking() {
+            window.location.href = 'tracking.html';
+        }
+
+        // 評価ページへ遷移（追跡ページから使用）
+        function goToRating() {
+            window.location.href = 'rating.html';
+        }
+
+        // 評価をスキップしてトップページへ
+        function skipToHome() {
+            if (confirm('評価をスキップしますか？\n配達員の励みになりますので、ぜひ評価をお願いします。')) {
+                resetOrder();
+            }
+        }
+
+        // 注文をリセットしてトップページへ
+        function resetOrder() {
+            // 選択情報のみクリア（お気に入りと評価履歴は保持）
+            localStorage.removeItem('selectedMenuId');
+            localStorage.removeItem('selectedMenuName');
+            localStorage.removeItem('selectedRiderId');
+            localStorage.removeItem('selectedRiderName');
+            window.location.href = 'index.html';
+        }
+
+        // ページ読み込み時の処理
+        window.addEventListener('DOMContentLoaded', () => {
+            // 選択情報がない場合はトップページへ
+            if (!localStorage.getItem('selectedMenuId') || !localStorage.getItem('selectedRiderId')) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            loadOrderDetails();
+        });
+    </script>
+</body>
+</html>
+

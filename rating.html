@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イケ配 - 評価する</title>
+    
+    <!-- PWA対応 -->
+    <meta name="description" content="料理も、ときめきも、一緒に届けます。イケメン配達員を指名できる新感覚デリバリーアプリ。">
+    <meta name="theme-color" content="#ff6b9d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="イケ配">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">🚴 イケ配 Ikehai</h1>
+            <p class="tagline">ときめく配達、届けます</p>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <div class="container">
+            <section class="intro-section">
+                <h2>配達はいかがでしたか？</h2>
+                <p>あなたの評価が、配達員の励みになります💕</p>
+            </section>
+
+            <!-- 評価カード -->
+            <div class="rating-container">
+                <!-- 配達員情報 -->
+                <div class="rating-rider-info">
+                    <img id="ratingRiderImage" src="" alt="配達員" class="rating-rider-avatar">
+                    <h3 id="ratingRiderName">配達員名</h3>
+                    <p class="rating-rider-type" id="ratingRiderType">タイプ</p>
+                </div>
+
+                <!-- 評価セクション -->
+                <div class="rating-section">
+                    <h4>⭐ 評価をお願いします</h4>
+                    <div class="star-rating" id="starRating">
+                        <span class="star" data-rating="1">☆</span>
+                        <span class="star" data-rating="2">☆</span>
+                        <span class="star" data-rating="3">☆</span>
+                        <span class="star" data-rating="4">☆</span>
+                        <span class="star" data-rating="5">☆</span>
+                    </div>
+                    <p class="rating-message" id="ratingMessage">タップして評価してください</p>
+                </div>
+
+                <!-- コメント入力 -->
+                <div class="comment-section">
+                    <h4>💬 コメント（任意）</h4>
+                    <textarea 
+                        id="commentInput" 
+                        class="comment-textarea" 
+                        placeholder="配達員へのメッセージをどうぞ...&#10;例：「いつも笑顔で癒されます！」「丁寧な配達ありがとうございます」"
+                        maxlength="200"
+                    ></textarea>
+                    <p class="character-count"><span id="charCount">0</span>/200</p>
+                </div>
+
+                <!-- チップセクション -->
+                <div class="tip-section">
+                    <h4>💰 チップを送る（任意）</h4>
+                    <p class="tip-description">感謝の気持ちを伝えましょう✨</p>
+                    <div class="tip-buttons">
+                        <button class="tip-btn" data-tip="0">チップなし</button>
+                        <button class="tip-btn" data-tip="100">¥100</button>
+                        <button class="tip-btn" data-tip="300">¥300</button>
+                        <button class="tip-btn" data-tip="500">¥500</button>
+                        <button class="tip-btn" data-tip="custom">その他</button>
+                    </div>
+                    <div class="custom-tip-container" id="customTipContainer" style="display: none;">
+                        <input type="number" id="customTipInput" class="custom-tip-input" placeholder="金額を入力（円）" min="100" step="100">
+                    </div>
+                    <p class="selected-tip">選択中のチップ: <strong id="selectedTipAmount">¥0</strong></p>
+                </div>
+
+                <!-- お気に入り登録 -->
+                <div class="favorite-section">
+                    <label class="favorite-checkbox">
+                        <input type="checkbox" id="favoriteCheckbox">
+                        <span class="favorite-label">❤️ この配達員をお気に入りに追加する</span>
+                    </label>
+                    <p class="favorite-description">次回から優先的に表示されます</p>
+                </div>
+
+                <!-- 送信ボタン -->
+                <div class="rating-actions">
+                    <button class="btn btn-secondary" onclick="skipRating()">
+                        スキップ
+                    </button>
+                    <button class="btn btn-primary btn-large" onclick="submitRating()" id="submitBtn">
+                        評価を送信する ✨
+                    </button>
+                </div>
+            </div>
+
+            <!-- 送信完了モーダル -->
+            <div id="thankYouModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-icon">💕</div>
+                    <h2>ありがとうございます！</h2>
+                    <div class="thank-you-message">
+                        <p id="thankYouText">あなたの評価が<br><span id="thankYouRiderName"></span>さんの励みになります</p>
+                        <div id="tipThankYou" class="tip-thank-you" style="display: none;">
+                            <p>💰 <strong id="tipAmount"></strong>のチップを送りました</p>
+                        </div>
+                        <div id="favoriteThankYou" class="favorite-thank-you" style="display: none;">
+                            <p>❤️ お気に入りに追加しました</p>
+                        </div>
+                    </div>
+                    <div class="rider-response">
+                        <img id="responseRiderImage" src="" alt="配達員" class="response-rider-avatar">
+                        <p class="rider-response-message" id="riderResponseMessage"></p>
+                    </div>
+                    <button class="btn btn-primary" onclick="goToHome()">
+                        トップページに戻る
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <p>&copy; 2025 Ikehai - All Rights Reserved</p>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        let selectedRating = 0;
+        let selectedTip = 0;
+        let currentRider = null;
+
+        // ページ読み込み時の処理
+        window.addEventListener('DOMContentLoaded', () => {
+            // 配達員情報を取得
+            const riderId = parseInt(localStorage.getItem('selectedRiderId'));
+            if (!riderId) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const ridersData = getRidersData();
+            currentRider = ridersData.find(rider => rider.id === riderId);
+
+            if (currentRider) {
+                // 配達員情報を表示
+                document.getElementById('ratingRiderImage').src = currentRider.image;
+                document.getElementById('ratingRiderName').textContent = currentRider.name;
+                document.getElementById('ratingRiderType').textContent = currentRider.type;
+            }
+
+            // イベントリスナー設定
+            setupStarRating();
+            setupTipButtons();
+            setupCommentCounter();
+        });
+
+        // 星評価のセットアップ
+        function setupStarRating() {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    selectedRating = parseInt(star.dataset.rating);
+                    updateStarDisplay();
+                });
+            });
+        }
+
+        // 星の表示を更新
+        function updateStarDisplay() {
+            const stars = document.querySelectorAll('.star');
+            const messages = ['', 'もう少し...', '普通です', '良かったです！', '最高でした！', '素晴らしい！💕'];
+            
+            stars.forEach(star => {
+                const rating = parseInt(star.dataset.rating);
+                star.textContent = rating <= selectedRating ? '★' : '☆';
+                star.classList.toggle('active', rating <= selectedRating);
+            });
+
+            document.getElementById('ratingMessage').textContent = messages[selectedRating];
+        }
+
+        // チップボタンのセットアップ
+        function setupTipButtons() {
+            const tipButtons = document.querySelectorAll('.tip-btn');
+            tipButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // すべてのボタンから選択を解除
+                    tipButtons.forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+
+                    const tipValue = btn.dataset.tip;
+                    if (tipValue === 'custom') {
+                        document.getElementById('customTipContainer').style.display = 'block';
+                        document.getElementById('customTipInput').focus();
+                    } else {
+                        document.getElementById('customTipContainer').style.display = 'none';
+                        selectedTip = parseInt(tipValue);
+                        updateTipDisplay();
+                    }
+                });
+            });
+
+            // カスタムチップ入力
+            document.getElementById('customTipInput').addEventListener('input', (e) => {
+                selectedTip = parseInt(e.target.value) || 0;
+                updateTipDisplay();
+            });
+        }
+
+        // チップ表示を更新
+        function updateTipDisplay() {
+            document.getElementById('selectedTipAmount').textContent = `¥${selectedTip.toLocaleString()}`;
+        }
+
+        // コメント文字数カウンター
+        function setupCommentCounter() {
+            document.getElementById('commentInput').addEventListener('input', (e) => {
+                document.getElementById('charCount').textContent = e.target.value.length;
+            });
+        }
+
+        // 評価を送信
+        function submitRating() {
+            if (selectedRating === 0) {
+                alert('評価を選択してください');
+                return;
+            }
+
+            const comment = document.getElementById('commentInput').value;
+            const isFavorite = document.getElementById('favoriteCheckbox').checked;
+
+            // LocalStorageに保存（実際のアプリではサーバーへ送信）
+            const ratingData = {
+                riderId: currentRider.id,
+                rating: selectedRating,
+                comment: comment,
+                tip: selectedTip,
+                favorite: isFavorite,
+                timestamp: new Date().toISOString()
+            };
+
+            // 評価履歴を保存
+            const ratings = JSON.parse(localStorage.getItem('ratings') || '[]');
+            ratings.push(ratingData);
+            localStorage.setItem('ratings', JSON.stringify(ratings));
+
+            // お気に入りを保存
+            if (isFavorite) {
+                const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                if (!favorites.includes(currentRider.id)) {
+                    favorites.push(currentRider.id);
+                    localStorage.setItem('favorites', JSON.stringify(favorites));
+                }
+            }
+
+            // 感謝モーダルを表示
+            showThankYouModal();
+        }
+
+        // 感謝モーダルを表示
+        function showThankYouModal() {
+            const modal = document.getElementById('thankYouModal');
+            
+            // 配達員名を設定
+            document.getElementById('thankYouRiderName').textContent = currentRider.name;
+            
+            // チップ情報を表示
+            if (selectedTip > 0) {
+                document.getElementById('tipThankYou').style.display = 'block';
+                document.getElementById('tipAmount').textContent = `¥${selectedTip.toLocaleString()}`;
+            }
+
+            // お気に入り情報を表示
+            if (document.getElementById('favoriteCheckbox').checked) {
+                document.getElementById('favoriteThankYou').style.display = 'block';
+            }
+
+            // 配達員からの返信メッセージ
+            const responseMessages = {
+                1: '貴重なご意見ありがとうございます。次回はより良いサービスを提供できるよう頑張ります。',
+                2: 'ご意見ありがとうございます。改善に努めてまいります。',
+                3: 'ご利用ありがとうございました！またお会いできるのを楽しみにしています。',
+                4: '高評価ありがとうございます！またぜひご利用ください💕',
+                5: '最高の評価をありがとうございます！あなたに届けられて本当に嬉しいです✨'
+            };
+
+            document.getElementById('responseRiderImage').src = currentRider.image;
+            document.getElementById('riderResponseMessage').textContent = 
+                `"${responseMessages[selectedRating]}" - ${currentRider.name}`;
+
+            modal.style.display = 'flex';
+        }
+
+        // 評価をスキップ
+        function skipRating() {
+            if (confirm('評価をスキップしますか？\n配達員の励みになりますので、ぜひ評価をお願いします。')) {
+                goToHome();
+            }
+        }
+
+        // トップページに戻る
+        function goToHome() {
+            // 選択情報をクリア（お気に入りと評価履歴は保持）
+            localStorage.removeItem('selectedMenuId');
+            localStorage.removeItem('selectedMenuName');
+            localStorage.removeItem('selectedRiderId');
+            localStorage.removeItem('selectedRiderName');
+            
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
+

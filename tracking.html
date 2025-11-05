@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イケ配 - 配達追跡</title>
+    
+    <!-- PWA対応 -->
+    <meta name="description" content="料理も、ときめきも、一緒に届けます。イケメン配達員を指名できる新感覚デリバリーアプリ。">
+    <meta name="theme-color" content="#ff6b9d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="イケ配">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">🚴 イケ配 Ikehai</h1>
+            <p class="tagline">ときめく配達、届けます</p>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <div class="container">
+            <section class="intro-section">
+                <h2 id="trackingTitle">注文を受け付けました！</h2>
+                <p id="trackingSubtitle">配達状況をリアルタイムでお知らせします</p>
+            </section>
+
+            <!-- 配達追跡コンテナ -->
+            <div class="tracking-container">
+                <!-- 配達員情報カード -->
+                <div class="tracking-rider-card">
+                    <div class="rider-info-header">
+                        <img id="trackingRiderImage" src="" alt="配達員" class="tracking-rider-avatar">
+                        <div class="rider-info-text">
+                            <h3 id="trackingRiderName">配達員名</h3>
+                            <p class="rider-type-small" id="trackingRiderType">タイプ</p>
+                            <p class="rider-stats-small">⭐ <span id="trackingRiderRating">0</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- カウントダウンタイマー -->
+                <div class="countdown-card">
+                    <div class="countdown-icon">⏱️</div>
+                    <div class="countdown-time" id="countdownTime">30:00</div>
+                    <p class="countdown-label">予定到着時刻まで</p>
+                </div>
+
+                <!-- 配達進行状況 -->
+                <div class="tracking-progress-card">
+                    <h3>📍 配達状況</h3>
+                    <div class="tracking-steps">
+                        <div class="tracking-step" id="step1">
+                            <div class="step-icon">🍳</div>
+                            <div class="step-info">
+                                <h4>調理中</h4>
+                                <p class="step-time">--:--</p>
+                            </div>
+                        </div>
+                        <div class="tracking-step" id="step2">
+                            <div class="step-icon">📦</div>
+                            <div class="step-info">
+                                <h4>受取完了</h4>
+                                <p class="step-time">--:--</p>
+                            </div>
+                        </div>
+                        <div class="tracking-step" id="step3">
+                            <div class="step-icon">🚴</div>
+                            <div class="step-info">
+                                <h4>配達中</h4>
+                                <p class="step-time">--:--</p>
+                            </div>
+                        </div>
+                        <div class="tracking-step" id="step4">
+                            <div class="step-icon">📍</div>
+                            <div class="step-info">
+                                <h4>まもなく到着</h4>
+                                <p class="step-time">--:--</p>
+                            </div>
+                        </div>
+                        <div class="tracking-step" id="step5">
+                            <div class="step-icon">✅</div>
+                            <div class="step-info">
+                                <h4>配達完了</h4>
+                                <p class="step-time">--:--</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- プログレスバー -->
+                    <div class="tracking-progress-bar">
+                        <div class="tracking-progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <!-- 配達員からのメッセージ -->
+                <div class="tracking-message-card" id="messageCard" style="display: none;">
+                    <div class="message-avatar">
+                        <img id="messageRiderImage" src="" alt="配達員">
+                    </div>
+                    <div class="message-content">
+                        <p class="message-name" id="messageName">配達員</p>
+                        <p class="message-text" id="messageText"></p>
+                        <p class="message-time" id="messageTime"></p>
+                    </div>
+                </div>
+
+                <!-- 注文詳細 -->
+                <div class="order-summary-card">
+                    <h3>📦 ご注文内容</h3>
+                    <div id="orderSummary" class="order-summary-content">
+                        <div class="loading">読み込み中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 配達完了モーダル -->
+    <div id="deliveryCompleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon delivery-complete-icon">🎊</div>
+            <h2>配達完了！</h2>
+            <p class="delivery-complete-message">
+                <span id="completeRiderName"></span>さんが<br>
+                お届けしました✨
+            </p>
+            <div class="delivery-complete-image">
+                <img id="completeRiderImage" src="" alt="配達員" class="complete-avatar">
+            </div>
+            <p class="delivery-message">いかがでしたか？<br>ぜひ評価をお願いします💕</p>
+            <button class="btn btn-primary btn-large" onclick="goToRating()">
+                配達員を評価する ⭐
+            </button>
+        </div>
+    </div>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <p>&copy; 2025 Ikehai - All Rights Reserved</p>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        let currentStep = 0;
+        let totalSeconds = 1800; // 30分（デモ用に短縮可能）
+        let elapsedSeconds = 0;
+        let countdownInterval;
+        let progressInterval;
+        let currentRider = null;
+        let currentMenu = null;
+
+        // 配達ステップの定義
+        const deliverySteps = [
+            {
+                step: 1,
+                delay: 3000, // 3秒後
+                message: "ご注文ありがとうございます！今から調理を開始します🍳",
+                progress: 20
+            },
+            {
+                step: 2,
+                delay: 8000, // 8秒後
+                message: "料理を受け取りました！これから配達に向かいます📦",
+                progress: 40
+            },
+            {
+                step: 3,
+                delay: 13000, // 13秒後
+                message: "配達中です！安全運転で向かっています🚴💨",
+                progress: 60
+            },
+            {
+                step: 4,
+                delay: 18000, // 18秒後
+                message: "もうすぐ到着します！お待たせしました😊",
+                progress: 80
+            },
+            {
+                step: 5,
+                delay: 23000, // 23秒後
+                message: "配達完了です！美味しく召し上がってください✨",
+                progress: 100
+            }
+        ];
+
+        // ページ読み込み時の処理
+        window.addEventListener('DOMContentLoaded', () => {
+            // 配達員・メニュー情報を取得
+            const riderId = parseInt(localStorage.getItem('selectedRiderId'));
+            const menuId = parseInt(localStorage.getItem('selectedMenuId'));
+
+            if (!riderId || !menuId) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const ridersData = getRidersData();
+            const menuData = getMenuData();
+            
+            currentRider = ridersData.find(rider => rider.id === riderId);
+            currentMenu = menuData.find(menu => menu.id === menuId);
+
+            if (currentRider && currentMenu) {
+                displayTrackingInfo();
+                startTracking();
+            }
+        });
+
+        // 追跡情報を表示
+        function displayTrackingInfo() {
+            // 配達員情報
+            document.getElementById('trackingRiderImage').src = currentRider.image;
+            document.getElementById('trackingRiderName').textContent = currentRider.name;
+            document.getElementById('trackingRiderType').textContent = currentRider.type;
+            document.getElementById('trackingRiderRating').textContent = currentRider.rating;
+            
+            document.getElementById('messageRiderImage').src = currentRider.image;
+
+            // 注文内容
+            const nominationFee = currentRider.nominationFee || 300;
+            const deliveryFee = 300;
+            const serviceFee = Math.floor(currentMenu.price * 0.1); // サービス手数料（10%）
+            const total = currentMenu.price + nominationFee + deliveryFee + serviceFee;
+
+            document.getElementById('orderSummary').innerHTML = `
+                <div class="summary-item">
+                    <span>${currentMenu.name}</span>
+                    <span>¥${currentMenu.price.toLocaleString()}</span>
+                </div>
+                <div class="summary-item">
+                    <span>配達料</span>
+                    <span>¥${deliveryFee.toLocaleString()}</span>
+                </div>
+                <div class="summary-item">
+                    <span>サービス手数料</span>
+                    <span>¥${serviceFee.toLocaleString()}</span>
+                </div>
+                <div class="summary-item">
+                    <span>指名料（${currentRider.name}さん）</span>
+                    <span>¥${nominationFee.toLocaleString()}</span>
+                </div>
+                <div class="summary-divider"></div>
+                <div class="summary-item summary-total">
+                    <span><strong>合計</strong></span>
+                    <span><strong>¥${total.toLocaleString()}</strong></span>
+                </div>
+            `;
+        }
+
+        // 追跡開始
+        function startTracking() {
+            // カウントダウン開始
+            startCountdown();
+
+            // 各ステップを順次実行
+            deliverySteps.forEach((stepData, index) => {
+                setTimeout(() => {
+                    updateStep(stepData.step, stepData.message, stepData.progress);
+                }, stepData.delay);
+            });
+        }
+
+        // カウントダウンタイマー
+        function startCountdown() {
+            // デモ用に30秒に短縮（本番は1800秒 = 30分）
+            totalSeconds = 30;
+            elapsedSeconds = 0;
+
+            countdownInterval = setInterval(() => {
+                elapsedSeconds++;
+                const remaining = totalSeconds - elapsedSeconds;
+                
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById('countdownTime').textContent = '00:00';
+                    return;
+                }
+
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                document.getElementById('countdownTime').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // ステップ更新
+        function updateStep(stepNumber, message, progress) {
+            currentStep = stepNumber;
+
+            // ステップをアクティブに
+            const stepElement = document.getElementById(`step${stepNumber}`);
+            stepElement.classList.add('active');
+            
+            // 時刻を表示
+            const now = new Date();
+            const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            stepElement.querySelector('.step-time').textContent = timeString;
+
+            // プログレスバー更新
+            document.getElementById('progressFill').style.width = `${progress}%`;
+
+            // メッセージ表示
+            if (message) {
+                showMessage(message);
+            }
+
+            // タイトル更新
+            updateTitle(stepNumber);
+
+            // 最終ステップで配達完了モーダル表示
+            if (stepNumber === 5) {
+                setTimeout(() => {
+                    showDeliveryCompleteModal();
+                }, 2000);
+            }
+        }
+
+        // メッセージ表示
+        function showMessage(message) {
+            const messageCard = document.getElementById('messageCard');
+            const now = new Date();
+            const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            document.getElementById('messageName').textContent = currentRider.name;
+            document.getElementById('messageText').textContent = message;
+            document.getElementById('messageTime').textContent = timeString;
+
+            messageCard.style.display = 'flex';
+            messageCard.classList.add('message-appear');
+
+            // メッセージを既読にする演出
+            setTimeout(() => {
+                messageCard.classList.remove('message-appear');
+            }, 500);
+        }
+
+        // タイトル更新
+        function updateTitle(stepNumber) {
+            const titles = [
+                '',
+                '🍳 調理中です...',
+                '📦 配達員が受け取りました',
+                '🚴 配達中です！',
+                '📍 まもなく到着します',
+                '✅ 配達完了しました！'
+            ];
+            document.getElementById('trackingTitle').textContent = titles[stepNumber];
+        }
+
+        // 配達完了モーダル表示
+        function showDeliveryCompleteModal() {
+            clearInterval(countdownInterval);
+
+            document.getElementById('completeRiderName').textContent = currentRider.name;
+            document.getElementById('completeRiderImage').src = currentRider.image;
+
+            const modal = document.getElementById('deliveryCompleteModal');
+            modal.style.display = 'flex';
+        }
+
+        // 評価ページへ遷移
+        function goToRating() {
+            window.location.href = 'rating.html';
+        }
+    </script>
+</body>
+</html>
+

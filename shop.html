@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イケ配 - オフィシャルショップ</title>
+    
+    <!-- PWA対応 -->
+    <meta name="description" content="料理も、ときめきも、一緒に届けます。イケメン配達員を指名できる新感覚デリバリーアプリ。">
+    <meta name="theme-color" content="#ff6b9d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="イケ配">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="logo">🚴 イケ配 Ikehai</h1>
+                    <p class="tagline">ときめく配達、届けます</p>
+                </div>
+                <div class="header-right">
+                    <div class="cart-icon" onclick="window.location.href='#cart'">
+                        🛒 <span id="cartCount" class="cart-count">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <div class="container">
+            <section class="intro-section">
+                <h2>🛍️ イケ配オフィシャルショップ</h2>
+                <p>配達員グッズ・写真集・限定イベントチケット</p>
+                <p class="intro-highlight">💕 推し活をもっと楽しく！</p>
+            </section>
+
+            <!-- カテゴリフィルター -->
+            <div class="filter-sort-container">
+                <div class="filter-section">
+                    <label class="filter-label">🏷️ カテゴリ:</label>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterProducts('all', this)">すべて</button>
+                        <button class="filter-btn" onclick="filterProducts('apparel', this)">アパレル</button>
+                        <button class="filter-btn" onclick="filterProducts('goods', this)">グッズ</button>
+                        <button class="filter-btn" onclick="filterProducts('publication', this)">写真集</button>
+                        <button class="filter-btn" onclick="filterProducts('event', this)">イベント</button>
+                    </div>
+                </div>
+                
+                <!-- 配達員フィルター -->
+                <div class="filter-section">
+                    <label class="filter-label">👨 配達員:</label>
+                    <div class="filter-buttons">
+                        <button class="filter-btn-small active" onclick="filterByRiderShop(null, this)">全て</button>
+                        <button class="filter-btn-small" onclick="filterByRiderShop(1, this)">Kento</button>
+                        <button class="filter-btn-small" onclick="filterByRiderShop(3, this)">Haruto</button>
+                        <button class="filter-btn-small" onclick="filterByRiderShop(11, this)">Yuuki</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品グリッド -->
+            <div id="productsGrid" class="card-grid">
+                <div class="loading">読み込み中...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- カート（サイドパネル風） -->
+    <div id="cartPanel" class="cart-panel">
+        <div class="cart-header">
+            <h3>🛒 カート</h3>
+            <button class="cart-close" onclick="closeCart()">×</button>
+        </div>
+        <div id="cartItems" class="cart-items">
+            <p class="cart-empty">カートは空です</p>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>合計:</span>
+                <span id="cartTotal" class="cart-total-price">¥0</span>
+            </div>
+            <button class="btn btn-primary btn-large" onclick="checkout()">
+                購入手続きへ進む
+            </button>
+        </div>
+    </div>
+
+    <!-- 購入完了モーダル -->
+    <div id="purchaseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">🎁</div>
+            <h2>ご購入ありがとうございます！</h2>
+            <div class="purchase-message">
+                <p>注文が確定しました</p>
+                <div id="purchaseSummary" class="purchase-summary">
+                    <!-- JavaScriptで生成 -->
+                </div>
+                <p class="delivery-info">📦 3〜5営業日でお届け予定です</p>
+            </div>
+            <button class="btn btn-primary" onclick="closePurchaseModal()">
+                ショップに戻る
+            </button>
+        </div>
+    </div>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <p>&copy; 2025 Ikehai - All Rights Reserved</p>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        let cart = [];
+        let currentCategoryFilter = 'all';
+        let currentRiderFilter = null;
+
+        // ページ読み込み時
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCart();
+            displayProducts();
+        });
+
+        // 商品を表示
+        function displayProducts() {
+            let products = getAllProducts();
+            
+            // カテゴリフィルター
+            if (currentCategoryFilter !== 'all') {
+                products = products.filter(p => p.category === currentCategoryFilter);
+            }
+            
+            // 配達員フィルター
+            if (currentRiderFilter !== null) {
+                products = products.filter(p => p.riderId === currentRiderFilter);
+            }
+            
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            if (products.length === 0) {
+                grid.innerHTML = '<p class="no-results">該当する商品がありません</p>';
+                return;
+            }
+
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'card product-card';
+                
+                // 限定バッジ
+                const limitedBadge = product.isLimited ? 
+                    '<span class="limited-badge">🌟 限定</span>' : '';
+                
+                // 人気バッジ
+                const popularBadge = product.isPopular ? 
+                    '<span class="popular-badge-menu">🔥 人気</span>' : '';
+                
+                // 会員限定バッジ
+                const memberBadge = product.memberOnly ? 
+                    '<span class="member-only-badge">👑 会員限定</span>' : '';
+                
+                // カテゴリ表示
+                const categoryNames = {
+                    apparel: 'アパレル',
+                    goods: 'グッズ',
+                    publication: '写真集',
+                    event: 'イベント'
+                };
+                const categoryTag = `<span class="category-tag">${categoryNames[product.category]}</span>`;
+                
+                // 配達員名
+                let riderName = '';
+                if (product.riderId) {
+                    const rider = getRiderById(product.riderId);
+                    if (rider) {
+                        riderName = `<p class="product-rider">by ${rider.name}</p>`;
+                    }
+                }
+                
+                // イベント詳細
+                let eventDetails = '';
+                if (product.category === 'event') {
+                    eventDetails = `
+                        <div class="event-details">
+                            <p>📅 ${product.date}</p>
+                            <p>⏰ ${product.time}</p>
+                            <p>📍 ${product.location}</p>
+                        </div>
+                    `;
+                }
+                
+                card.innerHTML = `
+                    <div class="card-image">
+                        <img src="${product.image}" alt="${product.name}">
+                        ${limitedBadge}
+                        ${popularBadge}
+                        ${memberBadge}
+                    </div>
+                    <div class="card-content">
+                        ${categoryTag}
+                        ${riderName}
+                        <h3 class="card-title">${product.name}</h3>
+                        <p class="card-description">${product.description}</p>
+                        ${eventDetails}
+                        <div class="product-stock">
+                            残り <strong>${product.stock}点</strong>
+                        </div>
+                        <div class="card-footer">
+                            <span class="price">¥${product.price.toLocaleString()}</span>
+                            <button class="btn btn-primary" onclick="addToCart(${product.id})">
+                                カートに追加 🛒
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // カテゴリフィルター
+        function filterProducts(category, clickedButton) {
+            currentCategoryFilter = category;
+            document.querySelectorAll('.filter-section:first-child .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+            displayProducts();
+        }
+
+        // 配達員フィルター
+        function filterByRiderShop(riderId, clickedButton) {
+            currentRiderFilter = riderId;
+            document.querySelectorAll('.filter-btn-small').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+            displayProducts();
+        }
+
+        // カートに追加
+        function addToCart(productId) {
+            const product = getAllProducts().find(p => p.id === productId);
+            if (!product) return;
+            
+            // 既に入っているか確認
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    quantity: 1
+                });
+            }
+            
+            saveCart();
+            updateCartDisplay();
+            
+            // 一瞬カートを開く
+            showCartBriefly();
+        }
+
+        // カートを一瞬表示
+        function showCartBriefly() {
+            const panel = document.getElementById('cartPanel');
+            panel.classList.add('show');
+            setTimeout(() => {
+                panel.classList.remove('show');
+            }, 2000);
+        }
+
+        // カートを開く
+        function openCart() {
+            document.getElementById('cartPanel').classList.add('show');
+        }
+
+        // カートを閉じる
+        function closeCart() {
+            document.getElementById('cartPanel').classList.remove('show');
+        }
+
+        // カート表示を更新
+        function updateCartDisplay() {
+            document.getElementById('cartCount').textContent = cart.length;
+            
+            const cartItems = document.getElementById('cartItems');
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p class="cart-empty">カートは空です</p>';
+                document.getElementById('cartTotal').textContent = '¥0';
+                return;
+            }
+            
+            let total = 0;
+            cartItems.innerHTML = '';
+            
+            cart.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'cart-item';
+                itemElement.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+                    <div class="cart-item-info">
+                        <p class="cart-item-name">${item.name}</p>
+                        <p class="cart-item-price">¥${item.price.toLocaleString()} × ${item.quantity}</p>
+                    </div>
+                    <button class="cart-item-remove" onclick="removeFromCart(${item.id})">×</button>
+                `;
+                cartItems.appendChild(itemElement);
+                total += item.price * item.quantity;
+            });
+            
+            document.getElementById('cartTotal').textContent = `¥${total.toLocaleString()}`;
+        }
+
+        // カートから削除
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            saveCart();
+            updateCartDisplay();
+        }
+
+        // カートを保存
+        function saveCart() {
+            localStorage.setItem('shop_cart', JSON.stringify(cart));
+        }
+
+        // カートを読み込み
+        function loadCart() {
+            const saved = localStorage.getItem('shop_cart');
+            if (saved) {
+                cart = JSON.parse(saved);
+                updateCartDisplay();
+            }
+        }
+
+        // 購入手続き
+        function checkout() {
+            if (cart.length === 0) {
+                alert('カートに商品がありません');
+                return;
+            }
+            
+            // 購入サマリーを生成
+            let total = 0;
+            let summaryHTML = '<div class="purchase-items">';
+            
+            cart.forEach(item => {
+                const subtotal = item.price * item.quantity;
+                total += subtotal;
+                summaryHTML += `
+                    <div class="purchase-item">
+                        <span>${item.name} × ${item.quantity}</span>
+                        <span>¥${subtotal.toLocaleString()}</span>
+                    </div>
+                `;
+            });
+            
+            summaryHTML += `
+                </div>
+                <div class="purchase-total">
+                    <span><strong>合計金額</strong></span>
+                    <span><strong>¥${total.toLocaleString()}</strong></span>
+                </div>
+            `;
+            
+            document.getElementById('purchaseSummary').innerHTML = summaryHTML;
+            
+            // モーダルを表示
+            document.getElementById('purchaseModal').style.display = 'flex';
+            
+            // カートをクリア
+            cart = [];
+            saveCart();
+            updateCartDisplay();
+            closeCart();
+        }
+
+        // 購入モーダルを閉じる
+        function closePurchaseModal() {
+            document.getElementById('purchaseModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+

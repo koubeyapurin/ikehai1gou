@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イケ配 - 定期便サブスクリプション</title>
+    
+    <!-- PWA対応 -->
+    <meta name="description" content="料理も、ときめきも、一緒に届けます。イケメン配達員を指名できる新感覚デリバリーアプリ。">
+    <meta name="theme-color" content="#ff6b9d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="イケ配">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="logo">🚴 イケ配 Ikehai</h1>
+                    <p class="tagline">ときめく配達、届けます</p>
+                </div>
+                <div class="header-right">
+                    <a href="index.html" class="shop-link">🏠 ホーム</a>
+                    <a href="shop.html" class="shop-link">🛍️ ショップ</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <div class="container">
+            <section class="intro-section">
+                <h2>📦 定期便サブスクリプション</h2>
+                <p>毎月、ときめきが届く</p>
+                <p class="intro-highlight">💕 推し活をもっと楽しく、もっと濃密に</p>
+            </section>
+
+            <!-- アクティブサブスク表示 -->
+            <div id="activeSubscriptions" class="active-subscriptions">
+                <!-- JavaScriptで生成 -->
+            </div>
+
+            <!-- グッズ定期便 -->
+            <section class="subscription-section">
+                <h3 class="section-title">🎁 グッズ定期便</h3>
+                <p class="section-description">毎月15日、イケ配オリジナルグッズ＋限定アイテムがあなたのもとへ</p>
+                
+                <div class="subscription-plans" id="subscriptionPlans">
+                    <!-- JavaScriptで生成 -->
+                </div>
+            </section>
+
+            <!-- フード定期便 -->
+            <section class="subscription-section">
+                <h3 class="section-title">🍱 グルメ定期便</h3>
+                <p class="section-description">月2回、人気レストランの料理をイケメン配達員がお届け</p>
+                
+                <div class="food-subscription-card" id="foodSubscription">
+                    <!-- JavaScriptで生成 -->
+                </div>
+            </section>
+
+            <!-- 比較表 -->
+            <section class="subscription-section">
+                <h3 class="section-title">📊 プラン比較</h3>
+                <div class="comparison-table-container">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>特典</th>
+                                <th>ベーシック</th>
+                                <th>プレミアム</th>
+                                <th>ラグジュアリー</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>月額料金</td>
+                                <td>¥2,980</td>
+                                <td>¥4,980</td>
+                                <td>¥9,980</td>
+                            </tr>
+                            <tr>
+                                <td>お届け頻度</td>
+                                <td>月1回</td>
+                                <td>月1回</td>
+                                <td>月1回</td>
+                            </tr>
+                            <tr>
+                                <td>グッズ数</td>
+                                <td>2〜3点</td>
+                                <td>3〜5点</td>
+                                <td>5〜8点</td>
+                            </tr>
+                            <tr>
+                                <td>未公開写真</td>
+                                <td>－</td>
+                                <td>L判</td>
+                                <td>A5写真集</td>
+                            </tr>
+                            <tr>
+                                <td>メッセージ</td>
+                                <td>手書き</td>
+                                <td>直筆</td>
+                                <td>ビデオ</td>
+                            </tr>
+                            <tr>
+                                <td>イベント優先予約</td>
+                                <td>－</td>
+                                <td>✓</td>
+                                <td>✓（無料参加）</td>
+                            </tr>
+                            <tr>
+                                <td>オンライン交流会</td>
+                                <td>－</td>
+                                <td>月1回</td>
+                                <td>プライベート</td>
+                            </tr>
+                            <tr>
+                                <td>誕生日特典</td>
+                                <td>－</td>
+                                <td>－</td>
+                                <td>✓</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- よくある質問 -->
+            <section class="subscription-section">
+                <h3 class="section-title">❓ よくある質問</h3>
+                <div class="faq-container">
+                    <div class="faq-item">
+                        <h4 class="faq-question">📅 いつ届きますか？</h4>
+                        <p class="faq-answer">グッズ定期便は毎月15日、グルメ定期便は毎月1日・15日にお届けします。</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4 class="faq-question">🔄 解約はいつでもできますか？</h4>
+                        <p class="faq-answer">はい、いつでも解約可能です。次回お届け日の5日前までにお申し出ください。</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4 class="faq-question">🎁 グッズの内容は選べますか？</h4>
+                        <p class="faq-answer">ラグジュアリーボックスのみ、グッズリクエスト権があります。その他のプランはお楽しみ内容となります。</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4 class="faq-question">👨 配達員は指名できますか？</h4>
+                        <p class="faq-answer">グルメ定期便のみ、配達員の指名が可能です。グッズ定期便は通常配送となります。</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 登録確認モーダル -->
+    <div id="subscriptionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">📦</div>
+            <h2 id="modalTitle">サブスク登録</h2>
+            <div class="subscription-confirm">
+                <div id="modalPlanInfo" class="modal-plan-info">
+                    <!-- JavaScriptで生成 -->
+                </div>
+                <div class="subscription-notes">
+                    <h4>📋 ご確認事項</h4>
+                    <ul>
+                        <li>✓ 初回お届けは来月15日を予定しています</li>
+                        <li>✓ 毎月自動更新されます</li>
+                        <li>✓ 解約は次回お届け日の5日前まで可能</li>
+                        <li>✓ お支払いは登録クレジットカードから</li>
+                    </ul>
+                </div>
+                <button class="btn btn-primary btn-large" onclick="confirmSubscription()">
+                    登録を確定する
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal()">
+                    キャンセル
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 登録完了モーダル -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon success-icon">🎉</div>
+            <h2>登録完了！</h2>
+            <div class="success-message">
+                <p class="congrats-text">定期便のご登録ありがとうございます！</p>
+                <div id="successSummary" class="subscription-success-summary">
+                    <!-- JavaScriptで生成 -->
+                </div>
+                <p class="next-delivery-info">📅 次回お届け予定日：<span id="nextDeliveryDate"></span></p>
+            </div>
+            <button class="btn btn-primary" onclick="closeSuccessModal()">
+                マイページで確認
+            </button>
+        </div>
+    </div>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <p>&copy; 2025 Ikehai - All Rights Reserved</p>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        let selectedPlanId = null;
+
+        // ページ読み込み時
+        window.addEventListener('DOMContentLoaded', () => {
+            displayActiveSubscriptions();
+            displaySubscriptionPlans();
+            displayFoodSubscription();
+        });
+
+        // アクティブなサブスク表示
+        function displayActiveSubscriptions() {
+            const subscriptions = getUserSubscriptions();
+            const container = document.getElementById('activeSubscriptions');
+            
+            if (subscriptions.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let html = '<h3 class="active-sub-title">✨ 契約中の定期便</h3><div class="active-sub-list">';
+            
+            subscriptions.forEach(sub => {
+                html += `
+                    <div class="active-sub-card">
+                        <div class="active-sub-info">
+                            <h4>${sub.planName}</h4>
+                            <p class="active-sub-price">月額 ¥${sub.price.toLocaleString()}</p>
+                            <p class="active-sub-next">次回お届け: ${new Date(sub.nextDelivery).toLocaleDateString('ja-JP')}</p>
+                        </div>
+                        <div class="active-sub-status">
+                            <span class="status-badge status-active">契約中</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // グッズ定期便プラン表示
+        function displaySubscriptionPlans() {
+            const data = getSubscriptionData();
+            const container = document.getElementById('subscriptionPlans');
+            
+            data.plans.forEach(plan => {
+                const card = document.createElement('div');
+                card.className = 'subscription-plan-card';
+                if (plan.popular) {
+                    card.classList.add('popular-plan');
+                }
+                
+                const popularBadge = plan.popular ? 
+                    '<span class="plan-popular-badge">🌟 人気No.1</span>' : '';
+                
+                const featuresList = plan.features.map(f => 
+                    `<li>✓ ${f}</li>`
+                ).join('');
+                
+                card.innerHTML = `
+                    <div class="plan-header" style="background: linear-gradient(135deg, ${plan.color}, ${plan.color}dd);">
+                        ${popularBadge}
+                        <h3 class="plan-name">${plan.name}</h3>
+                        <p class="plan-name-en">${plan.nameEn}</p>
+                        <div class="plan-price">
+                            <span class="price-amount">¥${plan.price.toLocaleString()}</span>
+                            <span class="price-period">/月</span>
+                        </div>
+                        <p class="plan-cycle">${plan.cycle}</p>
+                    </div>
+                    <div class="plan-body">
+                        <p class="plan-description">${plan.description}</p>
+                        <h4 class="plan-features-title">🎁 プラン内容</h4>
+                        <ul class="plan-features-list">
+                            ${featuresList}
+                        </ul>
+                        <div class="plan-savings">
+                            💰 年間で約¥${plan.savingsPerYear.toLocaleString()}お得！
+                        </div>
+                        <button class="btn btn-primary btn-large" onclick="selectPlan(${plan.id})">
+                            このプランに登録する
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // フード定期便表示
+        function displayFoodSubscription() {
+            const data = getSubscriptionData();
+            const food = data.foodSubscription;
+            const container = document.getElementById('foodSubscription');
+            
+            const featuresList = food.features.map(f => 
+                `<li>✓ ${f}</li>`
+            ).join('');
+            
+            container.innerHTML = `
+                <div class="food-sub-image">
+                    <img src="${food.image}" alt="${food.name}">
+                </div>
+                <div class="food-sub-content">
+                    <h3 class="food-sub-title">${food.name}</h3>
+                    <p class="food-sub-description">${food.description}</p>
+                    <div class="food-sub-price">
+                        <span class="price-amount">¥${food.price.toLocaleString()}</span>
+                        <span class="price-period">/月</span>
+                        <span class="food-sub-cycle">${food.cycle}</span>
+                    </div>
+                    <ul class="food-sub-features">
+                        ${featuresList}
+                    </ul>
+                    <button class="btn btn-primary btn-large" onclick="selectPlan(${food.id})">
+                        グルメ便に登録する
+                    </button>
+                </div>
+            `;
+        }
+
+        // プラン選択
+        function selectPlan(planId) {
+            selectedPlanId = planId;
+            const plan = getSubscriptionPlanById(planId);
+            if (!plan) return;
+            
+            document.getElementById('modalTitle').textContent = `${plan.name} に登録`;
+            document.getElementById('modalPlanInfo').innerHTML = `
+                <h3>${plan.name}</h3>
+                <p class="modal-plan-price">¥${plan.price.toLocaleString()} / 月</p>
+                <p class="modal-plan-description">${plan.description}</p>
+            `;
+            
+            document.getElementById('subscriptionModal').style.display = 'flex';
+        }
+
+        // 登録確定
+        function confirmSubscription() {
+            if (!selectedPlanId) return;
+            
+            addSubscription(selectedPlanId);
+            
+            const plan = getSubscriptionPlanById(selectedPlanId);
+            const nextDelivery = getNextDeliveryDate();
+            
+            document.getElementById('successSummary').innerHTML = `
+                <div class="success-plan-info">
+                    <h3>✨ ${plan.name}</h3>
+                    <p class="success-price">月額 ¥${plan.price.toLocaleString()}</p>
+                </div>
+            `;
+            document.getElementById('nextDeliveryDate').textContent = 
+                new Date(nextDelivery).toLocaleDateString('ja-JP');
+            
+            closeModal();
+            document.getElementById('successModal').style.display = 'flex';
+            
+            displayActiveSubscriptions();
+        }
+
+        // モーダルを閉じる
+        function closeModal() {
+            document.getElementById('subscriptionModal').style.display = 'none';
+            selectedPlanId = null;
+        }
+
+        // 成功モーダルを閉じる
+        function closeSuccessModal() {
+            document.getElementById('successModal').style.display = 'none';
+            // 実際のアプリではマイページに遷移
+        }
+    </script>
+</body>
+</html>
+

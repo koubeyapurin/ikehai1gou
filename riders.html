@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イケ配 - 配達員を選ぶ</title>
+    
+    <!-- PWA対応 -->
+    <meta name="description" content="料理も、ときめきも、一緒に届けます。イケメン配達員を指名できる新感覚デリバリーアプリ。">
+    <meta name="theme-color" content="#ff6b9d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="イケ配">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="logo">🚴 イケ配 Ikehai</h1>
+                    <p class="tagline">ときめく配達、届けます</p>
+                </div>
+                <div class="header-right">
+                    <a href="shop.html" class="shop-link">🛍️ ショップ</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <div class="container">
+            <!-- ステップインジケーター -->
+            <div class="step-indicator">
+                <div class="step completed">
+                    <span class="step-number">1</span>
+                    <span class="step-label">料理選択</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step active">
+                    <span class="step-number">2</span>
+                    <span class="step-label">配達員選択</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <span class="step-label">注文確認</span>
+                </div>
+            </div>
+
+            <section class="intro-section">
+                <h2>担当配達員を選んでください</h2>
+                <p id="selectedMenuItem">選択中: 読み込み中...</p>
+                <p class="intro-highlight">💕 あなたの「推し」を見つけてください</p>
+                <p class="rank-info-link"><a href="rank-info.html">👑 ランク制度について詳しく見る</a></p>
+            </section>
+
+            <!-- フィルター・ソートセクション -->
+            <div class="filter-sort-container">
+                <!-- ランクフィルター -->
+                <div class="filter-section">
+                    <label class="filter-label">👑 ランク:</label>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterByRank('all', this)">すべて</button>
+                        <button class="filter-btn" onclick="filterByRank('platinum', this)">👑 プラチナ</button>
+                        <button class="filter-btn" onclick="filterByRank('gold', this)">⭐ ゴールド</button>
+                        <button class="filter-btn" onclick="filterByRank('silver', this)">🥈 シルバー</button>
+                        <button class="filter-btn" onclick="filterByRank('bronze', this)">🥉 ブロンズ</button>
+                    </div>
+                </div>
+                
+                <div class="sort-section riders-sort">
+                    <label class="sort-label">📊 並び替え:</label>
+                    <select class="sort-select" onchange="sortRiders(this.value)">
+                        <option value="default">おすすめ順</option>
+                        <option value="rank">ランクが高い順</option>
+                        <option value="rating">評価が高い順</option>
+                        <option value="deliveries">配達回数が多い順</option>
+                        <option value="fee-asc">指名料が安い順</option>
+                        <option value="fee-desc">指名料が高い順</option>
+                    </select>
+                </div>
+                <p class="rider-count">配達員数: <span id="riderCount">12</span>名</p>
+            </div>
+
+            <!-- 配達員カード表示エリア -->
+            <div id="ridersGrid" class="card-grid riders-grid">
+                <div class="loading">読み込み中...</div>
+            </div>
+
+            <!-- 戻るボタン -->
+            <div class="back-button-container">
+                <button class="btn btn-secondary" onclick="window.location.href='index.html'">
+                    ← 料理を選び直す
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <p>&copy; 2025 Ikehai - All Rights Reserved</p>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        let allRidersData = [];
+        let currentSortType = 'default';
+        let currentRankFilter = 'all';
+
+        // ランクバッジを生成
+        function getRankBadge(rank, rankName) {
+            const rankConfig = {
+                platinum: { icon: '👑', color: '#9c27b0', gradient: 'linear-gradient(135deg, #9c27b0, #ba68c8)' },
+                gold: { icon: '⭐', color: '#ffa726', gradient: 'linear-gradient(135deg, #ffa726, #ffb74d)' },
+                silver: { icon: '🥈', color: '#78909c', gradient: 'linear-gradient(135deg, #78909c, #90a4ae)' },
+                bronze: { icon: '🥉', color: '#a1887f', gradient: 'linear-gradient(135deg, #a1887f, #bcaaa4)' }
+            };
+            
+            const config = rankConfig[rank] || rankConfig.bronze;
+            return `<span class="rank-badge rank-${rank}" style="background: ${config.gradient}">${config.icon} ${rankName}</span>`;
+        }
+        
+        // ランクの数値変換（ソート用）
+        function getRankOrder(rank) {
+            const rankOrder = { platinum: 4, gold: 3, silver: 2, bronze: 1 };
+            return rankOrder[rank] || 0;
+        }
+
+        // ランクでフィルター
+        function filterByRank(rank, clickedButton) {
+            currentRankFilter = rank;
+            
+            // ボタンのアクティブ状態を更新
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+            
+            applyFilterAndSort();
+        }
+
+        // フィルターとソートを適用
+        function applyFilterAndSort() {
+            let filteredData = [...allRidersData];
+            
+            // ランクフィルター適用
+            if (currentRankFilter !== 'all') {
+                filteredData = filteredData.filter(rider => rider.rank === currentRankFilter);
+            }
+            
+            // ソート適用（sortRiders関数を統合）
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            
+            switch (currentSortType) {
+                case 'rank':
+                    filteredData.sort((a, b) => getRankOrder(b.rank) - getRankOrder(a.rank));
+                    break;
+                case 'rating':
+                    filteredData.sort((a, b) => b.rating - a.rating);
+                    break;
+                case 'deliveries':
+                    filteredData.sort((a, b) => b.deliveries - a.deliveries);
+                    break;
+                case 'fee-asc':
+                    filteredData.sort((a, b) => a.nominationFee - b.nominationFee);
+                    break;
+                case 'fee-desc':
+                    filteredData.sort((a, b) => b.nominationFee - a.nominationFee);
+                    break;
+                case 'default':
+                default:
+                    filteredData.sort((a, b) => {
+                        const aIsFavorite = favorites.includes(a.id);
+                        const bIsFavorite = favorites.includes(b.id);
+                        if (aIsFavorite && !bIsFavorite) return -1;
+                        if (!aIsFavorite && bIsFavorite) return 1;
+                        if (a.isPopular && !b.isPopular) return -1;
+                        if (!a.isPopular && b.isPopular) return 1;
+                        return getRankOrder(b.rank) - getRankOrder(a.rank);
+                    });
+                    break;
+            }
+            
+            // カウント更新
+            document.getElementById('riderCount').textContent = filteredData.length;
+            
+            displayRiders(filteredData);
+        }
+
+        // 配達員データを読み込んで表示
+        function loadRiders() {
+            try {
+                // data.jsから直接配達員データを取得
+                allRidersData = getRidersData();
+                document.getElementById('riderCount').textContent = allRidersData.length;
+                displayRiders(allRidersData);
+            } catch (error) {
+                console.error('配達員データの読み込みに失敗しました:', error);
+                document.getElementById('ridersGrid').innerHTML = 
+                    '<p class="error">配達員データの読み込みに失敗しました。</p>';
+            }
+        }
+
+        // 配達員をソート
+        function sortRiders(sortType) {
+            currentSortType = sortType;
+            applyFilterAndSort();
+        }
+
+        // 配達員を画面に表示
+        function displayRiders(riders) {
+            const ridersGrid = document.getElementById('ridersGrid');
+            ridersGrid.innerHTML = '';
+
+            // お気に入りを取得
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            
+            // お気に入りの配達員を先頭に並べる
+            const sortedRiders = [...riders].sort((a, b) => {
+                const aIsFavorite = favorites.includes(a.id);
+                const bIsFavorite = favorites.includes(b.id);
+                if (aIsFavorite && !bIsFavorite) return -1;
+                if (!aIsFavorite && bIsFavorite) return 1;
+                return 0;
+            });
+
+            sortedRiders.forEach(rider => {
+                const isFavorite = favorites.includes(rider.id);
+                const card = document.createElement('div');
+                card.className = 'card rider-card';
+                
+                // 人気バッジの表示
+                const popularBadge = rider.isPopular ? 
+                    '<span class="popular-badge">🔥 人気</span>' : '';
+                
+                // お気に入りバッジの表示
+                const favoriteBadge = isFavorite ? 
+                    '<span class="favorite-badge-rider">❤️ お気に入り</span>' : '';
+                
+                // ランクバッジの表示
+                const rankBadge = getRankBadge(rider.rank, rider.rankName);
+                
+                // ランク特典の生成
+                const benefitsTags = rider.rankBenefits.map(benefit => 
+                    `<span class="benefit-tag">✓ ${benefit}</span>`
+                ).join('');
+                
+                // 趣味タグの生成
+                const hobbiesTags = rider.hobbies.map(hobby => 
+                    `<span class="hobby-tag">${hobby}</span>`
+                ).join('');
+                
+                // レビュー表示（最初の2件のみ）
+                const reviewsHTML = rider.reviews.slice(0, 2).map(review => `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="review-user">${review.user}</span>
+                            <span class="review-rating">${'⭐'.repeat(review.rating)}</span>
+                        </div>
+                        <p class="review-comment">${review.comment}</p>
+                    </div>
+                `).join('');
+                
+// スポンサー情報
+                const sponsorInfo = getSponsorInfo(rider.id);
+                const sponsorHTML = sponsorInfo ? `
+                    <div class="sponsor-info">
+                        <h4 class="sponsor-title">🤝 ブランドアンバサダー</h4>
+                        <div class="sponsor-card">
+                            <img src="${sponsorInfo.brandImage}" alt="${sponsorInfo.brandName}" class="sponsor-image">
+                            <div class="sponsor-text">
+                                <p class="sponsor-brand">${sponsorInfo.brandName}</p>
+                                <p class="sponsor-message">${sponsorInfo.brandMessage}</p>
+                            </div>
+                        </div>
+                    </div>
+                ` : '';
+                
+                // 関連グッズ情報
+                const relatedProducts = getProductsByRider(rider.id);
+                const productsHTML = relatedProducts.length > 0 ? `
+                    <div class="related-products">
+                        <h4 class="related-products-title">🛍️ ${rider.name}さん関連グッズ</h4>
+                        <div class="related-products-list">
+                            ${relatedProducts.slice(0, 2).map(product => `
+                                <div class="related-product-item" onclick="window.location.href='shop.html'">
+                                    <img src="${product.image}" alt="${product.name}" class="related-product-image">
+                                    <p class="related-product-name">${product.name}</p>
+                                    <p class="related-product-price">¥${product.price.toLocaleString()}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <a href="shop.html" class="related-products-link">もっと見る →</a>
+                    </div>
+                ` : '';
+                
+                card.innerHTML = `
+                    <div class="rider-image">
+                        <img src="${rider.image}" alt="${rider.name}">
+                        <span class="rider-type-badge">${rider.type}</span>
+                        ${popularBadge}
+                        ${favoriteBadge}
+                    </div>
+                    <div class="card-content">
+                        <div class="rider-header">
+                            <h3 class="card-title">${rider.name}</h3>
+                            ${rankBadge}
+                        </div>
+                        <p class="nomination-fee-large">指名料 ¥${rider.nominationFee.toLocaleString()}</p>
+                        <p class="rider-stats">
+                            ⭐ ${rider.rating} | 🚴 ${rider.deliveries}回配達
+                        </p>
+                        <p class="rider-quote">"${rider.quote}"</p>
+                        
+                        <!-- パーソナリティ -->
+                        <div class="rider-personality">
+                            <p><strong>✨ ${rider.personality}</strong></p>
+                        </div>
+                        
+                        <!-- ランク特典 -->
+                        <div class="rank-benefits-container">
+                            <h4 class="benefits-title">🎁 ${rider.rankName}ランク特典</h4>
+                            <div class="benefits-tags">
+                                ${benefitsTags}
+                            </div>
+                        </div>
+                        
+                        <!-- おすすめタイプ -->
+                        <div class="rider-recommend">
+                            <p>💕 <strong>こんな方におすすめ：</strong>${rider.recommendFor}</p>
+                        </div>
+                        
+                        <!-- 趣味タグ -->
+                        <div class="hobbies-container">
+                            ${hobbiesTags}
+                        </div>
+                        
+                        <!-- レビュー -->
+                        <div class="reviews-container">
+                            <h4 class="reviews-title">💬 お客様の声</h4>
+                            ${reviewsHTML}
+                        </div>
+                        
+<!-- スポンサー情報 -->
+                        ${sponsorHTML}
+                        
+                        <!-- 関連グッズ -->
+                        ${productsHTML}
+                        
+                        <button class="btn btn-primary" onclick="selectRider(${rider.id}, '${rider.name}')">
+                            ${rider.name}さんを指名する ❤️
+                        </button>
+                    </div>
+                `;
+                ridersGrid.appendChild(card);
+            });
+        }
+
+        // 配達員選択時の処理
+        function selectRider(riderId, riderName) {
+            // 選択情報をlocalStorageに保存
+            localStorage.setItem('selectedRiderId', riderId);
+            localStorage.setItem('selectedRiderName', riderName);
+            // 確認ページへ遷移
+            window.location.href = 'confirm.html';
+        }
+
+        // ページ読み込み時の処理
+        window.addEventListener('DOMContentLoaded', () => {
+            // 選択されたメニューを表示
+            const menuName = localStorage.getItem('selectedMenuName');
+            if (menuName) {
+                document.getElementById('selectedMenuItem').textContent = 
+                    `選択中: ${menuName}`;
+            } else {
+                // メニューが選択されていない場合はトップページへ
+                window.location.href = 'index.html';
+            }
+
+            // 配達員データを読み込み
+            loadRiders();
+        });
+    </script>
+</body>
+</html>
+

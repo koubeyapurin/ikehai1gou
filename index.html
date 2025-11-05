@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イケ配 - お食事を選ぶ</title>
+    
+    <!-- PWA対応 -->
+    <meta name="description" content="料理も、ときめきも、一緒に届けます。イケメン配達員を指名できる新感覚デリバリーアプリ。">
+    <meta name="theme-color" content="#ff6b9d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="イケ配">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="logo">🚴 イケ配 Ikehai</h1>
+                    <p class="tagline">ときめく配達、届けます</p>
+                </div>
+                <div class="header-right">
+                    <a href="subscription.html" class="shop-link">📦 定期便</a>
+                    <a href="shop.html" class="shop-link">🛍️ ショップ</a>
+                    <div id="membershipStatus" class="membership-status">
+                        <a href="premium.html" class="premium-link">💎 プレミアム会員</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <div class="container">
+            <section class="intro-section">
+                <h2>お好みの料理を選んでください</h2>
+                <p>選んだ後は、あなた専属のイケメン配達員を指名できます✨</p>
+                <p class="intro-highlight">💕 料理も、ときめきも、一緒に届けます</p>
+            </section>
+
+            <!-- バナー広告エリア -->
+            <div class="ad-banner-container" id="adBanner">
+                <!-- JavaScriptで動的に生成 -->
+            </div>
+
+            <!-- フィルター・ソートセクション -->
+            <div class="filter-sort-container">
+                <!-- カテゴリフィルター -->
+                <div class="filter-section">
+                    <label class="filter-label">🍽️ カテゴリ:</label>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterByCategory('all', this)">すべて</button>
+                        <button class="filter-btn" onclick="filterByCategory('洋食', this)">洋食</button>
+                        <button class="filter-btn" onclick="filterByCategory('和食', this)">和食</button>
+                        <button class="filter-btn" onclick="filterByCategory('中華', this)">中華</button>
+                        <button class="filter-btn" onclick="filterByCategory('エスニック', this)">エスニック</button>
+                        <button class="filter-btn" onclick="filterByCategory('デザート', this)">デザート</button>
+                    </div>
+                </div>
+
+                <!-- ソート -->
+                <div class="sort-section">
+                    <label class="sort-label">📊 並び替え:</label>
+                    <select class="sort-select" onchange="sortMenu(this.value)">
+                        <option value="default">おすすめ順</option>
+                        <option value="price-asc">価格が安い順</option>
+                        <option value="price-desc">価格が高い順</option>
+                        <option value="popular">人気順</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- メニューカード表示エリア -->
+            <div id="menuGrid" class="card-grid">
+                <!-- JavaScriptで動的に生成 -->
+                <div class="loading">読み込み中...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <p>&copy; 2025 Ikehai - All Rights Reserved</p>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/pwa-installer.js"></script>
+    <script>
+        let allMenuData = [];
+        let currentCategory = 'all';
+        let currentSort = 'default';
+
+        // バナー広告を表示
+        function displayAdBanner() {
+            const banners = getRandomBanners(1);
+            const banner = banners[0];
+            
+            const adBannerContainer = document.getElementById('adBanner');
+            adBannerContainer.innerHTML = `
+                <div class="ad-banner">
+                    <span class="ad-label">スポンサー</span>
+                    <div class="ad-content">
+                        <img src="${banner.image}" alt="${banner.title}" class="ad-image">
+                        <div class="ad-text">
+                            <h3 class="ad-title">${banner.title}</h3>
+                            <p class="ad-description">${banner.description}</p>
+                            <p class="ad-sponsor">提供: ${banner.sponsor}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // メニューデータを読み込んで表示
+        function loadMenu() {
+            try {
+                // data.jsから直接メニューデータを取得
+                allMenuData = getMenuData();
+                displayMenu(allMenuData);
+                displayAdBanner();
+            } catch (error) {
+                console.error('メニューの読み込みに失敗しました:', error);
+                document.getElementById('menuGrid').innerHTML = 
+                    '<p class="error">メニューの読み込みに失敗しました。</p>';
+            }
+        }
+
+        // カテゴリでフィルター
+        function filterByCategory(category, clickedButton) {
+            currentCategory = category;
+            
+            // ボタンのアクティブ状態を更新
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+            
+            applyFilterAndSort();
+        }
+
+        // ソート
+        function sortMenu(sortType) {
+            currentSort = sortType;
+            applyFilterAndSort();
+        }
+
+        // フィルターとソートを適用
+        function applyFilterAndSort() {
+            let filteredData = [...allMenuData];
+            
+            // カテゴリフィルター適用
+            if (currentCategory !== 'all') {
+                filteredData = filteredData.filter(item => item.category === currentCategory);
+            }
+            
+            // ソート適用
+            switch (currentSort) {
+                case 'price-asc':
+                    filteredData.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-desc':
+                    filteredData.sort((a, b) => b.price - a.price);
+                    break;
+                case 'popular':
+                    filteredData.sort((a, b) => {
+                        if (a.isPopular && !b.isPopular) return -1;
+                        if (!a.isPopular && b.isPopular) return 1;
+                        return 0;
+                    });
+                    break;
+                case 'default':
+                default:
+                    // デフォルト順（人気順 + ID順）
+                    filteredData.sort((a, b) => {
+                        if (a.isPopular && !b.isPopular) return -1;
+                        if (!a.isPopular && b.isPopular) return 1;
+                        return a.id - b.id;
+                    });
+                    break;
+            }
+            
+            displayMenu(filteredData);
+        }
+
+        // メニューを画面に表示
+        function displayMenu(items) {
+            const menuGrid = document.getElementById('menuGrid');
+            menuGrid.innerHTML = '';
+
+            if (items.length === 0) {
+                menuGrid.innerHTML = '<p class="no-results">該当するメニューがありません</p>';
+                return;
+            }
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card menu-card';
+                
+                // スポンサードチェック
+                const sponsored = isSponsored(item.id);
+                if (sponsored) {
+                    card.classList.add('sponsored-card');
+                }
+                
+                // 人気バッジ
+                const popularBadge = item.isPopular ? 
+                    '<span class="popular-badge-menu">🔥 人気</span>' : '';
+                
+                // スポンサードバッジ
+                const sponsoredBadge = sponsored ? 
+                    '<span class="sponsored-badge">📢 スポンサード</span>' : '';
+                
+                // カテゴリタグ
+                const categoryTag = `<span class="category-tag">${item.category}</span>`;
+                
+                card.innerHTML = `
+                    <div class="card-image">
+                        <img src="${item.image}" alt="${item.name}">
+                        ${popularBadge}
+                        ${sponsoredBadge}
+                    </div>
+                    <div class="card-content">
+                        ${categoryTag}
+                        <h3 class="card-title">${item.name}</h3>
+                        <p class="card-description">${item.description}</p>
+                        <div class="card-footer">
+                            <span class="price">¥${item.price.toLocaleString()}</span>
+                            <button class="btn btn-primary" onclick="selectMenu(${item.id}, '${item.name}')">
+                                このお店で注文
+                            </button>
+                        </div>
+                    </div>
+                `;
+                menuGrid.appendChild(card);
+            });
+        }
+
+        // メニュー選択時の処理
+        function selectMenu(menuId, menuName) {
+            // 選択情報をlocalStorageに保存
+            localStorage.setItem('selectedMenuId', menuId);
+            localStorage.setItem('selectedMenuName', menuName);
+            // 配達員選択ページへ遷移
+            window.location.href = 'riders.html';
+        }
+
+        // 会員ステータスを表示
+        function displayMembershipStatus() {
+            const membership = getMembershipData();
+            const statusElement = document.getElementById('membershipStatus');
+            
+            if (membership && membership.active) {
+                const planIcons = { light: '🌟', standard: '⭐', premium: '👑' };
+                const icon = planIcons[membership.plan] || '💎';
+                statusElement.innerHTML = `
+                    <div class="member-badge ${membership.plan}">
+                        ${icon} ${membership.planName}会員
+                    </div>
+                    <a href="premium.html" class="premium-link-small">詳細</a>
+                `;
+            }
+        }
+
+        // 会員情報を取得
+        function getMembershipData() {
+            const data = localStorage.getItem('membership');
+            return data ? JSON.parse(data) : null;
+        }
+
+        // ページ読み込み時にメニューを取得
+        window.addEventListener('DOMContentLoaded', () => {
+            loadMenu();
+            displayMembershipStatus();
+        });
+    </script>
+</body>
+</html>
+
